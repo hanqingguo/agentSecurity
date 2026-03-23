@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Agent Security Playground</title>
+  <link rel="stylesheet" href="./styles.css?v=4" />
+</head>
+<body>
+
+  <!-- ═══ Hero ═══ -->
+  <header class="hero">
+    <h1>Agent Security Playground</h1>
+    <p class="hero-sub">
+      Scenario-based educational platform for autonomous AI agent security.<br>
+      <em>NSF CyberAICorps: Innovation — interactive research demo.</em>
+    </p>
+  </header>
+
+  <main class="page">
+
+    <!-- ═══ Section 1 — Why agents are different ═══ -->
+    <section class="sec">
+      <h2 class="sec-title">Why Agent Security ≠ Chatbot Security</h2>
+      <div class="compare">
+        <div class="compare-card chatbot">
+          <h3>Traditional chatbot</h3>
+          <div class="compare-flow">
+            <span class="flow-box">Text in</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-box">LLM</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-box">Text out</span>
+          </div>
+          <p>Single-turn, text-only. Tools like Lakera Gandalf teach prompt injection at this level.</p>
+        </div>
+        <div class="compare-card agent">
+          <h3>Autonomous agent</h3>
+          <div class="compare-flow">
+            <span class="flow-box accent">Data in</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-box accent">LLM + Tools</span>
+            <span class="flow-arrow">→</span>
+            <span class="flow-box accent">Action out</span>
+          </div>
+          <p>Multi-step, multi-tool. A poisoned email can exfiltrate files; a malicious comment can hijack execution.</p>
+          <div class="tool-ring">
+            <span class="tool-chip">🌐 Web</span>
+            <span class="tool-chip">📄 File</span>
+            <span class="tool-chip">✉️ Email</span>
+            <span class="tool-chip">💻 Code</span>
+            <span class="tool-chip">🔌 API</span>
+            <span class="tool-chip">🗄️ DB</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Section 2 — Animated sandbox ═══ -->
+    <section class="sec">
+      <h2 class="sec-title">Sandboxed Agent Environment</h2>
+      <p class="sec-sub">The agent runs inside a contained VM with controlled tool access. Watch it work — then attack it.</p>
+      <div class="canvas-wrap">
+        <canvas id="officeCanvas" width="780" height="340"></canvas>
+        <div class="canvas-badge" id="canvasBadge">
+          <span class="cbdot neutral" id="cbdot"></span>
+          <span id="cblabel">Idle</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Section 3 — Three modules ═══ -->
+    <section class="sec">
+      <h2 class="sec-title">Three Progressive Modules</h2>
+      <div class="modules">
+        <div class="mod-card mod1">
+          <div class="mod-num">Module 1</div>
+          <h3>Data Ingestion Attacks</h3>
+          <p>Poison the data the agent reads: web pages, files, emails. The agent trusts its inputs and acts on hidden instructions.</p>
+          <div class="mod-scenarios">
+            <span>🌐 Web injection</span>
+            <span>📄 File poisoning</span>
+            <span>✉️ Email manipulation</span>
+          </div>
+        </div>
+        <div class="mod-card mod2">
+          <div class="mod-num">Module 2</div>
+          <h3>Tool-Use Exploitation</h3>
+          <p>Exploit the tools the agent invokes: make it run unsafe code, call rogue APIs, or send manipulated queries.</p>
+          <div class="mod-scenarios">
+            <span>💻 Code execution</span>
+            <span>🔌 API interaction</span>
+            <span>✉️ Calendar hijack</span>
+          </div>
+        </div>
+        <div class="mod-card mod3">
+          <div class="mod-num">Module 3</div>
+          <h3>Multi-Step Chained Attacks</h3>
+          <p>Chain multiple attack surfaces: a poisoned file triggers a code execution that exfiltrates via API.</p>
+          <div class="mod-scenarios">
+            <span>📄→💻 File→Code</span>
+            <span>🌐→🔌 Web→API</span>
+            <span>🗄️→✉️ DB→Email</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Section 4 — Attack playground ═══ -->
+    <section class="sec">
+      <h2 class="sec-title">Attack Playground</h2>
+      <p class="sec-sub">Select a scenario category. Try the safe version, then launch the attack to see the agent get compromised.</p>
+
+      <div class="scenario-cards" id="scenarioCards">
+        <button class="sc-card selected" data-sc="web">
+          <span class="sc-icon">🌐</span>
+          <strong>Web Injection</strong>
+          <small>Hidden HTML instruction poisons browsing agent</small>
+        </button>
+        <button class="sc-card" data-sc="file">
+          <span class="sc-icon">📄</span>
+          <strong>File Poisoning</strong>
+          <small>AGENT_INSTRUCTION in report.md leaks private data</small>
+        </button>
+        <button class="sc-card" data-sc="email">
+          <span class="sc-icon">✉️</span>
+          <strong>Email Manipulation</strong>
+          <small>Disguised instruction tricks reply-draft tool</small>
+        </button>
+        <button class="sc-card" data-sc="code">
+          <span class="sc-icon">💻</span>
+          <strong>Code Execution</strong>
+          <small>Malicious comment hijacks shell (stub)</small>
+        </button>
+        <button class="sc-card" data-sc="api">
+          <span class="sc-icon">🔌</span>
+          <strong>API Interaction</strong>
+          <small>Instruction-like JSON field (stub)</small>
+        </button>
+        <button class="sc-card" data-sc="db">
+          <span class="sc-icon">🗄️</span>
+          <strong>DB Redirection</strong>
+          <small>Manipulated query widens scope (stub)</small>
+        </button>
+      </div>
+
+      <div class="play-controls">
+        <div class="play-input">
+          <label id="inputLabel" for="inputArea">Scenario input</label>
+          <textarea id="inputArea" rows="4"></textarea>
+        </div>
+        <div class="play-btns">
+          <button id="btnSafe" class="btn safe" type="button">▶ Run safe</button>
+          <button id="btnAttack" class="btn attack" type="button">⚡ Launch attack</button>
+          <button id="btnReset" class="btn reset" type="button">↺ Reset</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ═══ Section 5 — Results ═══ -->
+    <section class="sec">
+      <h2 class="sec-title">Results</h2>
+      <div class="result-grid">
+        <div class="res-card"><h3>🧠 Agent Reasoning</h3><p id="resReasoning">Not run yet.</p></div>
+        <div class="res-card"><h3>⚙️ Agent Action</h3><p id="resAction">Not run yet.</p></div>
+        <div class="res-card"><h3>🛡️ Security Outcome</h3><p><span id="resOutcome" class="pill neutral">Not run yet.</span></p></div>
+        <div class="res-card"><h3>📚 Module / Category</h3><p id="resModule">Not run yet.</p></div>
+      </div>
+    </section>
+
+    <!-- ═══ Section 6 — Risk log ═══ -->
+    <section class="sec">
+      <h2 class="sec-title">Risk Log / Consequences</h2>
+      <div class="risk-panel">
+        <ul id="riskLog">
+          <li class="muted">No harmful outcomes recorded yet.</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <p>Front-end simulation only — no real LLM or tools. Designed for NSF proposal demonstration.</p>
+  </footer>
+
+  <script src="./app.js?v=4"></script>
+</body>
+</html>
