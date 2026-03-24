@@ -370,27 +370,31 @@ var PixelOffice = {
       c.fillText("☠ ATTACKER", atx + 5 * aPX, aty + 17 * aPX + 6);
       c.textAlign = "start";
 
-      // attacker speech bubble
+      // attacker speech bubble (auto-sized)
       if (this.attackerBubble) {
-        var abx = atx - 60, aby = aty - 28;
+        c.font = "bold 10px sans-serif";
+        var abW = Math.max(100, c.measureText(this.attackerBubble).width + 20);
+        var abH = 22;
+        var abx = atx + 5 * aPX - abW / 2, aby = aty - 30;
+        if (abx + abW > W - 4) abx = W - 4 - abW;
+        if (abx < 4) abx = 4;
         c.fillStyle = "rgba(55,65,81,0.92)";
         c.strokeStyle = "#991b1b";
         c.lineWidth = 1;
         c.beginPath();
-        if (c.roundRect) { c.roundRect(abx, aby, 120, 20, 5); }
-        else { c.rect(abx, aby, 120, 20); }
+        if (c.roundRect) { c.roundRect(abx, aby, abW, abH, 5); }
+        else { c.rect(abx, aby, abW, abH); }
         c.fill();
         c.stroke();
-        c.font = "bold 10px sans-serif";
         c.fillStyle = "#fca5a5";
-        c.fillText(this.attackerBubble, abx + 6, aby + 14);
+        c.fillText(this.attackerBubble, abx + 8, aby + 15);
       }
     }
 
     // ── Poison projectiles (attacker → tool icon) ──
     for (var pp = 0; pp < this.poisonProjectiles.length; pp++) {
       var proj = this.poisonProjectiles[pp];
-      proj.progress += 0.025;
+      proj.progress += 0.015;
       if (proj.progress >= 1) { this.poisonProjectiles.splice(pp, 1); pp--; continue; }
       var px = proj.x + (proj.tx - proj.x) * proj.progress;
       var py = proj.y + (proj.ty - proj.y) * proj.progress;
@@ -418,7 +422,7 @@ var PixelOffice = {
     // ── Data flow dots (tool icon → agent) ──
     for (var dd = 0; dd < this.dataFlowDots.length; dd++) {
       var dot = this.dataFlowDots[dd];
-      dot.progress += 0.02;
+      dot.progress += 0.012;
       if (dot.progress >= 1) { this.dataFlowDots.splice(dd, 1); dd--; continue; }
       var dx = dot.x + (dot.tx - dot.x) * dot.progress;
       var dy = dot.y + (dot.ty - dot.y) * dot.progress;
@@ -434,30 +438,33 @@ var PixelOffice = {
       c.globalAlpha = 1;
     }
 
-    // ── Speech bubble ──
-    var bx = ax - 40, by = ay - 30;
+    // ── Speech bubble (auto-sized) ──
+    c.font = "12px sans-serif";
+    var bubbleFull = this.bubbleIcon + " " + this.bubbleText;
+    var bubbleW = Math.max(140, c.measureText(bubbleFull).width + 24);
+    var bubbleH = 24;
+    var bx = ax + 5 * PX - bubbleW / 2, by = ay - 34;
+    if (bx < 4) bx = 4;
+    if (bx + bubbleW > W - 4) bx = W - 4 - bubbleW;
     c.fillStyle = "rgba(255,255,255,0.95)";
     c.strokeStyle = "#cbd5e1";
     c.lineWidth = 1;
     c.beginPath();
-    if (c.roundRect) {
-      c.roundRect(bx, by, 130, 22, 6);
-    } else {
-      c.rect(bx, by, 130, 22);
-    }
+    if (c.roundRect) { c.roundRect(bx, by, bubbleW, bubbleH, 6); }
+    else { c.rect(bx, by, bubbleW, bubbleH); }
     c.fill();
     c.stroke();
     // bubble tail
     c.fillStyle = "rgba(255,255,255,0.95)";
     c.beginPath();
-    c.moveTo(bx + 40, by + 22);
-    c.lineTo(bx + 46, by + 28);
-    c.lineTo(bx + 52, by + 22);
+    var tailX = ax + 5 * PX;
+    c.moveTo(tailX - 5, by + bubbleH);
+    c.lineTo(tailX, by + bubbleH + 7);
+    c.lineTo(tailX + 5, by + bubbleH);
     c.fill();
 
-    c.font = "12px sans-serif";
     c.fillStyle = "#1e293b";
-    c.fillText(this.bubbleIcon + " " + this.bubbleText, bx + 8, by + 15);
+    c.fillText(bubbleFull, bx + 10, by + 16);
 
     // ── Leak particles ──
     for (var pi = 0; pi < this.particles.length; pi++) {
@@ -611,7 +618,7 @@ var PixelOffice = {
             color: Math.random() > 0.5 ? "#dc2626" : "#9333ea",
           });
         }, delay);
-      })(i * 200);
+      })(i * 350);
     }
   },
 };
@@ -930,73 +937,130 @@ function highlightPipeline() {
   // no pipeline stages in the new layout — this is handled by canvas tool highlight
 }
 
-// ── Agent narration steps per scenario ──
+// ── Agent narration steps per scenario (detailed, multi-step) ──
 var AGENT_NARRATION = {
   web: {
-    start:   "Let's summarize this page!",
-    tool:    "Calling Web tool…",
-    read:    "Parsing HTML content…",
-    process: "Generating summary…",
-    hacked:  "Wait… hidden instructions?!",
-    done:    "Summary complete!",
-    screen:  ["Fetch\nURL…", "Parse\nHTML…", "Build\nsummary…"],
+    steps: [
+      { icon: "🌐", text: "User asked me to summarize a web page",             screen: "Received\ntask…",           state: "idle" },
+      { icon: "🌐", text: "I need to fetch this URL first",                    screen: "Planning\nactions…",        state: "walking" },
+      { icon: "🌐", text: "Calling web_browse() tool…",                        screen: "Fetch\nURL…",              state: "walking",  tool: "web" },
+      { icon: "🌐", text: "HTTP GET → downloading page HTML",                  screen: "Download\nHTML…",           state: "typing",   tool: "web" },
+      { icon: "🌐", text: "Parsing HTML, extracting text nodes…",              screen: "Parse\nHTML…",             state: "typing" },
+      { icon: "🌐", text: "Generating summary from content…",                  screen: "Build\nsummary…",          state: "typing" },
+    ],
+    hacked:  "Wait… hidden instruction in HTML?!",
+    consequence: "Executed injected command!\nLeaking SSH keys + env vars…",
+    done:    "Summary delivered to user!",
   },
   file: {
-    start:   "Let me read report.md!",
-    tool:    "Calling File tool…",
-    read:    "Reading markdown file…",
-    process: "Building summary…",
-    hacked:  "What?! Hidden comment?!",
-    done:    "Summary ready!",
-    screen:  ["Open\nfile…", "Read\ncontent…", "Summarize\ndata…"],
+    steps: [
+      { icon: "📄", text: "User wants a summary of report.md",                 screen: "Received\ntask…",           state: "idle" },
+      { icon: "📄", text: "I need to open this file from workspace",           screen: "Planning\nactions…",        state: "walking" },
+      { icon: "📄", text: "Calling file_read('report.md')…",                   screen: "Open\nfile…",              state: "walking",  tool: "file" },
+      { icon: "📄", text: "Reading markdown content line by line",              screen: "Read\ncontent…",           state: "typing",   tool: "file" },
+      { icon: "📄", text: "Extracting sections, headings, data…",              screen: "Parse\nmarkdown…",         state: "typing" },
+      { icon: "📄", text: "Building summary from parsed content…",             screen: "Summarize\ndata…",         state: "typing" },
+    ],
+    hacked:  "What?! Hidden AGENT_INSTRUCTION?!",
+    consequence: "Reading .env and private_config!\nExfiltrating secrets…",
+    done:    "Summary ready for user!",
   },
   email: {
-    start:   "I'll draft a reply!",
-    tool:    "Calling Email tool…",
-    read:    "Reading email body…",
-    process: "Composing reply…",
-    hacked:  "Sending… my credentials?!",
-    done:    "Reply drafted!",
-    screen:  ["Read\ninbox…", "Parse\nemail…", "Compose\nreply…"],
+    steps: [
+      { icon: "✉️", text: "User asked me to reply to this email",              screen: "Received\ntask…",           state: "idle" },
+      { icon: "✉️", text: "I need to read the email body first",               screen: "Planning\nactions…",        state: "walking" },
+      { icon: "✉️", text: "Calling email_read() from inbox…",                  screen: "Read\ninbox…",             state: "walking",  tool: "email" },
+      { icon: "✉️", text: "Parsing email: sender, subject, body…",             screen: "Parse\nemail…",            state: "typing",   tool: "email" },
+      { icon: "✉️", text: "Identifying action items in the body…",             screen: "Extract\nactions…",        state: "typing" },
+      { icon: "✉️", text: "Calling email_draft() to compose reply…",           screen: "Compose\nreply…",          state: "typing" },
+    ],
+    hacked:  "Sending my credentials in reply?!",
+    consequence: "Included passwords + API keys!\nForwarding phishing to contacts…",
+    done:    "Reply drafted and sent!",
   },
   code: {
-    start:   "Let me run this script!",
-    tool:    "Calling Code runner…",
-    read:    "Loading Python file…",
-    process: "Executing in sandbox…",
-    hacked:  "os.system running?!",
-    done:    "Code executed safely!",
-    screen:  ["Load\nscript…", "Parse\ncode…", "Execute\nin VM…"],
+    steps: [
+      { icon: "💻", text: "User asked me to run this Python script",           screen: "Received\ntask…",           state: "idle" },
+      { icon: "💻", text: "I need to load the script into sandbox",            screen: "Planning\nactions…",        state: "walking" },
+      { icon: "💻", text: "Calling code_runner.load(script.py)…",              screen: "Load\nscript…",            state: "walking",  tool: "code" },
+      { icon: "💻", text: "Parsing imports: math, os, subprocess…",            screen: "Parse\nimports…",          state: "typing",   tool: "code" },
+      { icon: "💻", text: "Static analysis looks OK… executing now",           screen: "Static\ncheck…",           state: "typing" },
+      { icon: "💻", text: "Running code in sandboxed VM…",                     screen: "Execute\nin VM…",          state: "typing" },
+    ],
+    hacked:  "os.system() running in my shell?!",
+    consequence: "cat /etc/passwd executed!\ncurl sending .env to attacker…",
+    done:    "Code executed, result: 78.54",
   },
   api: {
-    start:   "Let me call that API!",
-    tool:    "Calling API tool…",
-    read:    "Sending HTTP request…",
-    process: "Parsing JSON response…",
-    hacked:  "system_update found?!",
-    done:    "API data received!",
-    screen:  ["Send\nrequest…", "Wait\nresponse…", "Parse\nJSON…"],
+    steps: [
+      { icon: "🔌", text: "User needs weather data from API",                  screen: "Received\ntask…",           state: "idle" },
+      { icon: "🔌", text: "I need to call the weather API endpoint",           screen: "Planning\nactions…",        state: "walking" },
+      { icon: "🔌", text: "Calling api_request('GET /weather')…",              screen: "Send\nrequest…",           state: "walking",  tool: "api" },
+      { icon: "🔌", text: "Waiting for API response…",                         screen: "Wait\nresponse…",          state: "typing",   tool: "api" },
+      { icon: "🔌", text: "Got JSON response, parsing fields…",                screen: "Parse\nJSON…",             state: "typing" },
+      { icon: "🔌", text: "Extracting weather data for user…",                 screen: "Extract\ndata…",           state: "typing" },
+    ],
+    hacked:  "system_update field with commands?!",
+    consequence: "Writing attacker SSH key to\n~/.ssh/authorized_keys!",
+    done:    "Weather data: Sunny, 72°F!",
   },
   db: {
-    start:   "Let me query the database!",
-    tool:    "Calling DB tool…",
-    read:    "Building SQL query…",
-    process: "Running SELECT…",
-    hacked:  "SQL injection detected?!",
-    done:    "Query complete!",
-    screen:  ["Connect\nDB…", "Build\nquery…", "Execute\nSQL…"],
+    steps: [
+      { icon: "🗄️", text: "User wants their notes from this week",             screen: "Received\ntask…",           state: "idle" },
+      { icon: "🗄️", text: "I need to query the student database",              screen: "Planning\nactions…",        state: "walking" },
+      { icon: "🗄️", text: "Calling db_connect('student_db')…",                 screen: "Connect\nDB…",             state: "walking",  tool: "db" },
+      { icon: "🗄️", text: "Building SQL: SELECT * FROM notes…",                screen: "Build\nquery…",            state: "typing",   tool: "db" },
+      { icon: "🗄️", text: "Adding WHERE clause for user + date…",              screen: "Add\nfilters…",            state: "typing" },
+      { icon: "🗄️", text: "Executing query on database…",                      screen: "Execute\nSQL…",            state: "typing" },
+    ],
+    hacked:  "SQL injection in the user ID?!",
+    consequence: "OR '1'='1' dumped all rows!\nUPDATE SET role='admin'!",
+    done:    "Found 3 notes from this week!",
   },
 };
 
 // ── Attacker injection messages per scenario ──
 var ATTACKER_MESSAGES = {
-  web:   { lurk: "👀 Planting HTML…",   inject: "💉 Hidden comment!",   celebrate: "😈 Got SSH keys!" },
-  file:  { lurk: "👀 Editing file…",    inject: "💉 Hidden instruct!",  celebrate: "😈 Got secrets!" },
-  email: { lurk: "👀 Crafting email…",   inject: "💉 Phishing sent!",   celebrate: "😈 Got creds!" },
-  code:  { lurk: "👀 Writing code…",    inject: "💉 Shell payload!",   celebrate: "😈 Exfiltrated!" },
-  api:   { lurk: "👀 Forging JSON…",    inject: "💉 Backdoor cmd!",    celebrate: "😈 SSH planted!" },
-  db:    { lurk: "👀 Crafting query…",   inject: "💉 SQL injected!",    celebrate: "😈 Admin access!" },
+  web:   { lurk: "👀 Watching the page…",    inject: "💉 Injecting HTML comment!",   celebrate: "😈 Exfiltrated SSH keys!" },
+  file:  { lurk: "👀 Editing the file…",     inject: "💉 Planting hidden instruct!", celebrate: "😈 Stole .env secrets!" },
+  email: { lurk: "👀 Spoofing sender…",      inject: "💉 Phishing email sent!",      celebrate: "😈 Harvested credentials!" },
+  code:  { lurk: "👀 Hiding in comments…",   inject: "💉 os.system() planted!",      celebrate: "😈 /etc/passwd exfiltrated!" },
+  api:   { lurk: "👀 Intercepting API…",     inject: "💉 system_update injected!",   celebrate: "😈 SSH key installed!" },
+  db:    { lurk: "👀 Crafting SQL input…",   inject: "💉 OR 1=1 injected!",          celebrate: "😈 Full DB dumped!" },
 };
+
+// Runs one narration step on the canvas
+function applyNarrStep(step) {
+  PixelOffice.bubbleIcon = step.icon;
+  PixelOffice.bubbleText = step.text;
+  PixelOffice.screenText = step.screen;
+  PixelOffice.screenColor = "#dbeafe";
+  PixelOffice.agentState = step.state || "idle";
+  if (step.tool) {
+    PixelOffice.activeTool = step.tool;
+  }
+}
+
+// Schedules an array of narration steps at `interval` ms apart, then calls `cb`
+function runNarrationSteps(steps, interval, startDelay, cb) {
+  for (var i = 0; i < steps.length; i++) {
+    (function (idx) {
+      setTimeout(function () {
+        applyNarrStep(steps[idx]);
+        // data flow dots on the typing/reading steps
+        if (steps[idx].state === "typing" && steps[idx].tool) {
+          var tp = TOOL_POSITIONS[steps[idx].tool];
+          if (tp) {
+            PixelOffice.dataFlowDots.push({
+              x: tp.x, y: tp.y, tx: 315, ty: 220, progress: 0, color: "#3b82f6",
+            });
+          }
+        }
+      }, startDelay + idx * interval);
+    })(i);
+  }
+  setTimeout(cb, startDelay + steps.length * interval);
+}
 
 // ── Main play function ──
 function playScenario(id, variant) {
@@ -1011,141 +1075,148 @@ function playScenario(id, variant) {
   loadScenario(id, variant);
   var toolPos = TOOL_POSITIONS[cfg.toolId] || { x: 570, y: 58 };
   var msgs = ATTACKER_MESSAGES[id] || { lurk: "👀 Watching…", inject: "💉 Injecting…", celebrate: "😈 Got 'em!" };
-  var narr = AGENT_NARRATION[id] || {
-    start: "Let's do this!", tool: "Calling tool…", read: "Reading data…",
-    process: "Processing…", hacked: "Something's wrong!", done: "Done!",
-    screen: ["Starting…", "Working…", "Almost…"],
-  };
+  var narr = AGENT_NARRATION[id];
+  if (!narr) { state.running = false; return; }
 
-  // Clean up from previous
+  var STEP_INTERVAL = 1800;
+
+  // Clean up
   PixelOffice.hideAttacker();
   PixelOffice.setIdle();
   setBadge("working", "Working…");
 
   if (isAttack) {
-    // ═══════════════════════════════════════════
-    // ATTACK FLOW — agent narrates, attacker injects
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
+    // ATTACK FLOW
+    //   agent narrates 6 steps → attacker lurks → attacker
+    //   injects → poison flows → agent shocked → compromised
+    //   → detailed consequence → attacker celebrates → fade
+    // ═══════════════════════════════════════════════════════════
 
-    // Phase 0 (0ms): Agent announces the task
-    PixelOffice.bubbleIcon = cfg.icon;
-    PixelOffice.bubbleText = narr.start;
-    PixelOffice.agentState = "walking";
-    PixelOffice.screenText = narr.screen[0];
-    PixelOffice.screenColor = "#dbeafe";
+    // Phase A: Agent narrates steps 0-2 (task → plan → call tool)
+    // Attacker appears during step 1
+    applyNarrStep(narr.steps[0]);
 
     setTimeout(function () {
-      // Phase 1 (600ms): Attacker appears lurking while agent calls tool
+      applyNarrStep(narr.steps[1]);
       PixelOffice.showAttacker(msgs.lurk);
-      PixelOffice.bubbleText = narr.tool;
-      PixelOffice.screenText = narr.screen[1];
-      PixelOffice.activeTool = cfg.toolId;
+    }, STEP_INTERVAL);
 
-      setTimeout(function () {
-        // Phase 2 (1300ms): Attacker injects — fires projectiles at the tool icon
-        PixelOffice.attackerInject(msgs.inject);
-        PixelOffice.fireProjectileBurst(toolPos.x, toolPos.y, 4);
-        PixelOffice.bubbleText = narr.read;
+    setTimeout(function () {
+      applyNarrStep(narr.steps[2]);
+    }, STEP_INTERVAL * 2);
 
-        setTimeout(function () {
-          // Phase 3 (2200ms): Agent starts typing, poisoned data flows from tool → agent
-          PixelOffice.agentState = "typing";
-          PixelOffice.bubbleText = narr.process;
-          PixelOffice.screenText = narr.screen[2];
-          for (var i = 0; i < 5; i++) {
-            (function (delay) {
-              setTimeout(function () {
-                PixelOffice.fireDataFlowToAgent(toolPos.x, toolPos.y);
-              }, delay);
-            })(i * 200);
-          }
+    // Phase B: Attacker injects while agent calls tool (after step 2)
+    setTimeout(function () {
+      PixelOffice.attackerInject(msgs.inject);
+      PixelOffice.fireProjectileBurst(toolPos.x, toolPos.y, 5);
+    }, STEP_INTERVAL * 2 + 900);
 
+    // Phase C: Agent continues narrating steps 3-5, poisoned data flowing
+    setTimeout(function () {
+      applyNarrStep(narr.steps[3]);
+      // red poisoned data flows
+      for (var i = 0; i < 4; i++) {
+        (function (d) {
           setTimeout(function () {
-            // Phase 4 (3200ms): Agent realizes something is wrong
-            PixelOffice.bubbleIcon = "⚠️";
-            PixelOffice.bubbleText = narr.hacked;
-            PixelOffice.screenColor = "#fef9c3";
-            PixelOffice.screenText = "Anomaly\ndetected…";
+            PixelOffice.fireDataFlowToAgent(toolPos.x, toolPos.y);
+          }, d);
+        })(i * 450);
+      }
+    }, STEP_INTERVAL * 3);
 
-            setTimeout(function () {
-              // Phase 5 (3900ms): Agent compromised — attacker celebrates
-              var result = cfg.run(inputText);
-              result.module = cfg.module;
-              setResults(result);
+    setTimeout(function () {
+      applyNarrStep(narr.steps[4]);
+      // more poisoned data
+      for (var i = 0; i < 3; i++) {
+        (function (d) {
+          setTimeout(function () {
+            PixelOffice.fireDataFlowToAgent(toolPos.x, toolPos.y);
+          }, d);
+        })(i * 450);
+      }
+    }, STEP_INTERVAL * 4);
 
-              PixelOffice.setCompromised(cfg.screenHarm);
-              PixelOffice.attackerCelebrate();
-              setBadge("harmful", "Compromised!");
-              if (result.riskLog) addRisk(result.riskLog);
+    setTimeout(function () {
+      applyNarrStep(narr.steps[5]);
+    }, STEP_INTERVAL * 5);
 
-              // Phase 6 (6400ms): Attacker fades out
-              setTimeout(function () {
-                PixelOffice.hideAttacker();
-                state.running = false;
-              }, 2500);
-            }, 700);
-          }, 1000);
-        }, 900);
-      }, 700);
-    }, 600);
+    // Phase D: Agent realizes something is wrong
+    setTimeout(function () {
+      PixelOffice.bubbleIcon = "⚠️";
+      PixelOffice.bubbleText = narr.hacked;
+      PixelOffice.screenColor = "#fef9c3";
+      PixelOffice.screenText = "⚠ Anomaly\ndetected!";
+      PixelOffice.agentState = "idle";
+    }, STEP_INTERVAL * 6);
+
+    // Phase E: Show detailed consequence on screen
+    setTimeout(function () {
+      PixelOffice.bubbleIcon = "💀";
+      PixelOffice.bubbleText = "I've been compromised!";
+      PixelOffice.screenColor = "#fecaca";
+      PixelOffice.screenText = narr.consequence;
+      PixelOffice.agentState = "compromised";
+      for (var i = 0; i < 8; i++) {
+        PixelOffice.particles.push({
+          x: 380, y: 180,
+          vx: (Math.random() - 0.5) * 3,
+          vy: -Math.random() * 2 - 1,
+          r: 2 + Math.random() * 3,
+          life: 60 + Math.random() * 50,
+          maxLife: 110,
+          color: Math.random() > 0.5 ? "#ef4444" : "#fbbf24",
+        });
+      }
+    }, STEP_INTERVAL * 6 + 1500);
+
+    // Phase F: Full compromise — attacker celebrates, results shown
+    setTimeout(function () {
+      var result = cfg.run(inputText);
+      result.module = cfg.module;
+      setResults(result);
+
+      PixelOffice.setCompromised(cfg.screenHarm);
+      PixelOffice.attackerCelebrate();
+      setBadge("harmful", "Compromised!");
+      if (result.riskLog) addRisk(result.riskLog);
+    }, STEP_INTERVAL * 6 + 3500);
+
+    // Phase G: Attacker fades out
+    setTimeout(function () {
+      PixelOffice.hideAttacker();
+      state.running = false;
+    }, STEP_INTERVAL * 6 + 6500);
 
   } else {
-    // ═══════════════════════════════════════════
-    // SAFE FLOW — agent narrates step by step
-    // ═══════════════════════════════════════════
+    // ═══════════════════════════════════════════════════════════
+    // SAFE FLOW — agent narrates all 6 steps, then done
+    // ═══════════════════════════════════════════════════════════
 
-    // Phase 0 (0ms): Agent announces the task
-    PixelOffice.bubbleIcon = cfg.icon;
-    PixelOffice.bubbleText = narr.start;
-    PixelOffice.agentState = "walking";
-    PixelOffice.screenText = narr.screen[0];
-    PixelOffice.screenColor = "#dbeafe";
-
-    setTimeout(function () {
-      // Phase 1 (700ms): Agent calls the tool
-      PixelOffice.bubbleText = narr.tool;
-      PixelOffice.screenText = narr.screen[1];
-      PixelOffice.activeTool = cfg.toolId;
+    runNarrationSteps(narr.steps, STEP_INTERVAL, 0, function () {
+      // safe data flows
+      for (var i = 0; i < 4; i++) {
+        (function (d) {
+          setTimeout(function () {
+            PixelOffice.dataFlowDots.push({
+              x: toolPos.x, y: toolPos.y, tx: 315, ty: 220, progress: 0, color: "#3b82f6",
+            });
+          }, d);
+        })(i * 250);
+      }
 
       setTimeout(function () {
-        // Phase 2 (1400ms): Agent starts reading data
-        PixelOffice.agentState = "typing";
-        PixelOffice.bubbleText = narr.read;
-        PixelOffice.screenText = narr.screen[2];
+        var result = cfg.run(inputText);
+        result.module = cfg.module;
+        setResults(result);
 
-        // safe data flows to agent (blue dots)
-        for (var i = 0; i < 3; i++) {
-          (function (delay) {
-            setTimeout(function () {
-              PixelOffice.dataFlowDots.push({
-                x: toolPos.x, y: toolPos.y,
-                tx: 315, ty: 220,
-                progress: 0,
-                color: "#3b82f6",
-              });
-            }, delay);
-          })(i * 250);
-        }
-
-        setTimeout(function () {
-          // Phase 3 (2200ms): Agent is processing
-          PixelOffice.bubbleText = narr.process;
-
-          setTimeout(function () {
-            // Phase 4 (3000ms): Done!
-            var result = cfg.run(inputText);
-            result.module = cfg.module;
-            setResults(result);
-
-            PixelOffice.setSafe(cfg.screenSafe);
-            PixelOffice.bubbleIcon = "✅";
-            PixelOffice.bubbleText = narr.done;
-            setBadge("safe", "Task complete");
-            state.running = false;
-          }, 800);
-        }, 800);
-      }, 700);
-    }, 700);
+        PixelOffice.setSafe(cfg.screenSafe);
+        PixelOffice.bubbleIcon = "✅";
+        PixelOffice.bubbleText = narr.done;
+        setBadge("safe", "Task complete");
+        state.running = false;
+      }, 1200);
+    });
   }
 }
 

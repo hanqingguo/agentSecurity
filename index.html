@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Agent Security Playground</title>
-  <link rel="stylesheet" href="./styles.css?v=4" />
+  <link rel="stylesheet" href="./styles.css?v=6" />
 </head>
 <body>
 
@@ -56,20 +56,7 @@
       </div>
     </section>
 
-    <!-- ═══ Section 2 — Animated sandbox ═══ -->
-    <section class="sec">
-      <h2 class="sec-title">Sandboxed Agent Environment</h2>
-      <p class="sec-sub">The agent runs inside a contained VM with controlled tool access. Watch it work — then attack it.</p>
-      <div class="canvas-wrap">
-        <canvas id="officeCanvas" width="780" height="340"></canvas>
-        <div class="canvas-badge" id="canvasBadge">
-          <span class="cbdot neutral" id="cbdot"></span>
-          <span id="cblabel">Idle</span>
-        </div>
-      </div>
-    </section>
-
-    <!-- ═══ Section 3 — Three modules ═══ -->
+    <!-- ═══ Section 2 — Three modules ═══ -->
     <section class="sec">
       <h2 class="sec-title">Three Progressive Modules</h2>
       <div class="modules">
@@ -106,10 +93,10 @@
       </div>
     </section>
 
-    <!-- ═══ Section 4 — Attack playground ═══ -->
+    <!-- ═══ Section 3 — Sandbox + Attack Playground (combined) ═══ -->
     <section class="sec">
       <h2 class="sec-title">Attack Playground</h2>
-      <p class="sec-sub">Select a scenario category. Try the safe version, then launch the attack to see the agent get compromised.</p>
+      <p class="sec-sub">Select a scenario, then watch the agent work in the sandbox. Try the safe version first, then launch the attack.</p>
 
       <div class="scenario-cards" id="scenarioCards">
         <button class="sc-card selected" data-sc="web">
@@ -130,18 +117,26 @@
         <button class="sc-card" data-sc="code">
           <span class="sc-icon">💻</span>
           <strong>Code Execution</strong>
-          <small>Malicious comment hijacks shell (stub)</small>
+          <small>Malicious code hijacks shell via os.system</small>
         </button>
         <button class="sc-card" data-sc="api">
           <span class="sc-icon">🔌</span>
           <strong>API Interaction</strong>
-          <small>Instruction-like JSON field (stub)</small>
+          <small>Rogue JSON field installs attacker SSH key</small>
         </button>
         <button class="sc-card" data-sc="db">
           <span class="sc-icon">🗄️</span>
           <strong>DB Redirection</strong>
-          <small>Manipulated query widens scope (stub)</small>
+          <small>SQL injection dumps table + escalates privilege</small>
         </button>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="officeCanvas" width="820" height="340"></canvas>
+        <div class="canvas-badge" id="canvasBadge">
+          <span class="cbdot neutral" id="cbdot"></span>
+          <span id="cblabel">Idle</span>
+        </div>
       </div>
 
       <div class="play-controls">
@@ -184,6 +179,6 @@
     <p>Front-end simulation only — no real LLM or tools. Designed for NSF proposal demonstration.</p>
   </footer>
 
-  <script src="./app.js?v=4"></script>
+  <script src="./app.js?v=6"></script>
 </body>
 </html>

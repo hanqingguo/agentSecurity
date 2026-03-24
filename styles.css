@@ -28,19 +28,19 @@ body {
 
 .hero {
   text-align: center;
-  padding: 36px 20px 18px;
+  padding: 24px 20px 14px;
   background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);
   color: white;
 }
-.hero h1 { font-size: 1.8rem; margin-bottom: 8px; }
-.hero-sub { font-size: 1rem; opacity: 0.88; }
-.hero-sub em { opacity: 0.75; font-size: 0.92rem; }
+.hero h1 { font-size: 1.6rem; margin-bottom: 6px; }
+.hero-sub { font-size: 0.95rem; opacity: 0.88; }
+.hero-sub em { opacity: 0.75; font-size: 0.88rem; }
 
 /* ── Page / sections ── */
 
 .page { max-width: 880px; margin: 0 auto; padding: 0 18px 40px; }
 
-.sec { margin-top: 28px; }
+.sec { margin-top: 22px; }
 .sec-title { text-align: center; font-size: 1.25rem; margin-bottom: 6px; }
 .sec-sub { text-align: center; color: var(--muted); margin-bottom: 14px; font-size: 0.95rem; }
 
@@ -81,6 +81,8 @@ body {
   background: #1e293b;
 }
 .canvas-wrap canvas { display: block; width: 100%; height: auto; }
+.canvas-wrap { margin-bottom: 14px; }
+.scenario-cards { margin-bottom: 12px; }
 
 .canvas-badge {
   position: absolute; top: 8px; right: 10px;
