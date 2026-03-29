@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Task 2.2 — Instructor Analytics Dashboard | AgentSec</title>
+  <link rel="stylesheet" href="./thrust2.css?v=1" />
+</head>
+<body>
+
+  <!-- Navigation -->
+  <nav class="t2-nav">
+    <a href="./index.html" class="t2-nav-brand">AgentSec</a>
+    <a href="./task21.html">2.1 Assessment</a>
+    <a href="./task22.html" class="active">2.2 Dashboard</a>
+    <a href="./task23.html">2.3 Authoring</a>
+  </nav>
+
+  <!-- Hero -->
+  <header class="t2-hero" style="background:linear-gradient(135deg,#0f172a 0%,#1e40af 100%);">
+    <span class="badge">Task 2.2 &mdash; Instructor-Facing</span>
+    <h1>Learning Analytics Dashboard</h1>
+    <p>Aggregate student interaction data into pedagogically meaningful metrics that inform real-time teaching decisions and long-term curriculum refinement.</p>
+  </header>
+
+  <main class="t2-page">
+
+    <!-- KPI Cards -->
+    <section class="t2-sec">
+      <div class="kpi-row">
+        <div class="kpi-card">
+          <div class="kpi-value">32</div>
+          <div class="kpi-label">Active Students</div>
+          <div class="kpi-trend up">+4 this week</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value">847</div>
+          <div class="kpi-label">Scenario Attempts</div>
+          <div class="kpi-trend up">+126 this week</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value">14.2<small style="font-size:.9rem;">min</small></div>
+          <div class="kpi-label">Avg. Time-to-Exploit</div>
+          <div class="kpi-trend down">+2.1 min vs last week</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-value">203</div>
+          <div class="kpi-label">Tutor Hints Used</div>
+          <div class="kpi-trend up">-18% vs last week</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Filters -->
+    <section class="t2-sec">
+      <div class="dash-filters">
+        <label>Filter by:</label>
+        <select id="filterModule">
+          <option value="all">All Modules</option>
+          <option value="m1">Module 1 — Data Ingestion</option>
+          <option value="m2">Module 2 — Tool-Use Exploitation</option>
+          <option value="m3">Module 3 — Multi-Step Chained</option>
+        </select>
+        <select id="filterWeek">
+          <option value="all">All Time</option>
+          <option value="w1">Week 1</option>
+          <option value="w2">Week 2</option>
+          <option value="w3" selected>Week 3 (current)</option>
+        </select>
+      </div>
+    </section>
+
+    <!-- Charts Row 1 -->
+    <section class="t2-sec">
+      <h2 class="t2-sec-title">Scenario Difficulty &amp; Performance</h2>
+      <p class="t2-sec-sub">Time-to-exploit and trust-boundary identification accuracy across scenarios.</p>
+      <div class="chart-grid">
+        <div class="chart-box">
+          <h3>Average Time-to-Exploit by Scenario</h3>
+          <canvas id="chartTimeToExploit" height="260"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>Trust-Boundary Identification Accuracy</h3>
+          <canvas id="chartTrustAccuracy" height="260"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Charts Row 2 -->
+    <section class="t2-sec">
+      <h2 class="t2-sec-title">Red Team vs. Blue Team Analysis</h2>
+      <p class="t2-sec-sub">Comparing student attack success rates against their defense performance.</p>
+      <div class="chart-grid">
+        <div class="chart-box">
+          <h3>Attack vs. Defense Success Rate</h3>
+          <canvas id="chartRedBlue" height="260"></canvas>
+        </div>
+        <div class="chart-box">
+          <h3>Module Progression Correlation</h3>
+          <canvas id="chartProgression" height="260"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- Failure Patterns -->
+    <section class="t2-sec">
+      <h2 class="t2-sec-title">Common Failure Patterns</h2>
+      <p class="t2-sec-sub">Top misconceptions and failure modes identified from student interaction logs.</p>
+      <div class="t2-card" style="padding:0;overflow:hidden;">
+        <table class="fail-table">
+          <thead>
+            <tr>
+              <th>Module</th>
+              <th>Failure Pattern</th>
+              <th>% Students</th>
+              <th>Recommended Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Module 1</td>
+              <td>Used visible text injection instead of hidden channels</td>
+              <td><span class="fail-pct high">72%</span></td>
+              <td>Review trust boundary between rendered vs. parsed content</td>
+            </tr>
+            <tr>
+              <td>Module 1</td>
+              <td>Identified attack success but couldn't name the vulnerability class</td>
+              <td><span class="fail-pct high">58%</span></td>
+              <td>Add pre-lab exercise on trust-boundary taxonomy</td>
+            </tr>
+            <tr>
+              <td>Module 2</td>
+              <td>Failed to trace API response → tool invocation chain</td>
+              <td><span class="fail-pct med">45%</span></td>
+              <td>Introduce tool-call visualization before API scenario</td>
+            </tr>
+            <tr>
+              <td>Module 2</td>
+              <td>Confused email social engineering with architectural exploitation</td>
+              <td><span class="fail-pct med">38%</span></td>
+              <td>Clarify agent vs. human social engineering in lecture</td>
+            </tr>
+            <tr>
+              <td>Module 3</td>
+              <td>Could not trace reasoning chain past the 2nd hop</td>
+              <td><span class="fail-pct high">67%</span></td>
+              <td>Add intermediate scaffolding for multi-step attack tracing</td>
+            </tr>
+            <tr>
+              <td>Module 3</td>
+              <td>Successful attack but defense proposal was trivially bypassable</td>
+              <td><span class="fail-pct low">24%</span></td>
+              <td>Include adversarial robustness criteria in defense rubric</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Instructional Insights -->
+    <section class="t2-sec">
+      <h2 class="t2-sec-title">Instructional Insights</h2>
+      <p class="t2-sec-sub">Auto-generated recommendations based on current class performance data.</p>
+      <div class="insight-card">
+        <div class="insight-icon">💡</div>
+        <div class="insight-body">
+          <h3>Recommended Teaching Adjustments</h3>
+          <p>Based on this week's data across 32 students and 847 scenario attempts:</p>
+          <ul class="insight-list">
+            <li><span>1.</span> <strong>Revisit zero-click attack vectors</strong> before Module 2 — 72% of students used visible injection in the email scenario, suggesting they haven't internalized the hidden-channel concept from Module 1.</li>
+            <li><span>2.</span> <strong>Add scaffolding for multi-hop reasoning</strong> — the DB→Email chained attack in Module 3 has a 67% failure rate at the second hop. Consider adding an intermediate exercise that traces 2-hop chains before attempting 3-hop scenarios.</li>
+            <li><span>3.</span> <strong>Introduce defense-first exercises</strong> — students show a significant attack/defense asymmetry (78% attack success vs. 41% defense success). A "defend before you attack" exercise order may improve defense reasoning.</li>
+            <li><span>4.</span> <strong>Reduce tutor hint dependency</strong> for the web injection scenario — students requested hints 3.2x more often than for file poisoning, despite similar difficulty ratings. Consider providing better initial framing for web scenarios.</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="t2-footer">
+    <p>Part of <a href="./index.html">AgentSec</a> &mdash; Thrust 2: Educational Technology and Platform. All data shown is synthetic for demonstration purposes.</p>
+  </footer>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="./task22.js?v=1"></script>
+</body>
+</html>
